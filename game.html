@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Machine Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .atm-container {
+            width: 900px;
+            height: 600px;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+            border: 8px solid #1a252f;
+            overflow: hidden;
+        }
+
+        .atm-screen {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            width: 400px;
+            height: 300px;
+            background: #000;
+            border-radius: 10px;
+            border: 4px solid #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #00ff00;
+            font-size: 18px;
+            text-align: center;
+            padding: 20px;
+            box-shadow: inset 0 0 20px rgba(0,255,0,0.1);
+        }
+
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #00ff00;
+        }
+
+        .screen-message {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .input-display {
+            background: #111;
+            border: 2px solid #333;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 20px;
+            text-align: center;
+            min-height: 30px;
+            width: 80%;
+        }
+
+        .keypad {
+            position: absolute;
+            top: 50px;
+            right: 50px;
+            width: 350px;
+            height: 400px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .keypad-btn {
+            background: linear-gradient(145deg, #4a5568, #2d3748);
+            border: 2px solid #1a202c;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .keypad-btn:hover {
+            background: linear-gradient(145deg, #5a6578, #3d4758);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .keypad-btn:active {
+            transform: translateY(0);
+        }
+
+        .function-buttons {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 400px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .function-btn {
+            background: linear-gradient(145deg, #e53e3e, #c53030);
+            border: 2px solid #9b2c2c;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            min-width: 100px;
+        }
+
+        .function-btn:hover {
+            background: linear-gradient(145deg, #f56565, #e53e3e);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .function-btn:active {
+            transform: translateY(0);
+        }
+
+        .card-slot {
+            position: absolute;
+            top: 380px;
+            left: 50px;
+            width: 200px;
+            height: 40px;
+            background: linear-gradient(145deg, #4a5568, #2d3748);
+            border-radius: 5px;
+            border: 2px solid #1a202c;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .card-slot::before {
+            content: "INSERT CARD";
+            color: #a0aec0;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .cash-dispenser {
+            position: absolute;
+            bottom: 50px;
+            right: 50px;
+            width: 150px;
+            height: 80px;
+            background: linear-gradient(145deg, #2d3748, #1a202c);
+            border-radius: 8px;
+            border: 2px solid #0f1419;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cash-dispenser::before {
+            content: "CASH DISPENSER";
+            color: #a0aec0;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .atm-brand {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #e2e8f0;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="atm-container">
+        <div class="atm-brand">BANK ATM</div>
+
+        <div class="atm-screen">
+            <div class="screen-content" id="screen-content">
+                <div class="screen-title">Welcome to BANK ATM</div>
+                <div class="screen-message">Please select an option</div>
+            </div>
+        </div>
+
+        <div class="keypad">
+            <button class="keypad-btn" data-value="1">1</button>
+            <button class="keypad-btn" data-value="2">2</button>
+            <button class="keypad-btn" data-value="3">3</button>
+            <button class="keypad-btn" data-value="4">4</button>
+            <button class="keypad-btn" data-value="5">5</button>
+            <button class="keypad-btn" data-value="6">6</button>
+            <button class="keypad-btn" data-value="7">7</button>
+            <button class="keypad-btn" data-value="8">8</button>
+            <button class="keypad-btn" data-value="9">9</button>
+            <button class="keypad-btn" id="clear-btn">CLR</button>
+            <button class="keypad-btn" data-value="0">0</button>
+            <button class="keypad-btn" id="enter-btn">ENT</button>
+        </div>
+
+        <div class="function-buttons">
+            <button class="function-btn" id="balance-btn">BALANCE</button>
+            <button class="function-btn" id="withdraw-btn">WITHDRAW</button>
+            <button class="function-btn" id="deposit-btn">DEPOSIT</button>
+        </div>
+
+        <div class="card-slot"></div>
+        <div class="cash-dispenser"></div>
+    </div>
+
+    <script>
+        let currentBalance = 5000; // Initial balance
+        let currentInput = '';
+        let currentMode = 'menu'; // menu, balance, withdraw, deposit
+
+        const screenContent = document.getElementById('screen-content');
+        const balanceBtn = document.getElementById('balance-btn');
+        const withdrawBtn = document.getElementById('withdraw-btn');
+        const depositBtn = document.getElementById('deposit-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const enterBtn = document.getElementById('enter-btn');
+        const keypadBtns = document.querySelectorAll('.keypad-btn[data-value]');
+
+        function updateScreen(title, message, showInput = false) {
+            screenContent.innerHTML = `
+                <div class="screen-title">${title}</div>
+                <div class="screen-message">${message}</div>
+                ${showInput ? '<div class="input-display" id="input-display">' + currentInput + '</div>' : ''}
+            `;
+        }
+
+        function showMenu() {
+            currentMode = 'menu';
+            currentInput = '';
+            updateScreen('Welcome to BANK ATM', 'Please select an option');
+        }
+
+        function showBalance() {
+            currentMode = 'balance';
+            updateScreen('Account Balance', `Your current balance is: $${currentBalance.toFixed(2)}`);
+            setTimeout(showMenu, 3000); // Auto return to menu after 3 seconds
+        }
+
+        function showWithdraw() {
+            currentMode = 'withdraw';
+            currentInput = '';
+            updateScreen('Withdraw Money', 'Enter amount to withdraw:', true);
+        }
+
+        function showDeposit() {
+            currentMode = 'deposit';
+            currentInput = '';
+            updateScreen('Deposit Money', 'Enter amount to deposit:', true);
+        }
+
+        function processWithdraw(amount) {
+            const withdrawAmount = parseFloat(amount);
+            if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
+                updateScreen('Error', 'Invalid amount. Please try again.');
+                setTimeout(showWithdraw, 2000);
+                return;
+            }
+            if (withdrawAmount > currentBalance) {
+                updateScreen('Error', 'Insufficient funds.');
+                setTimeout(showWithdraw, 2000);
+                return;
+            }
+            currentBalance -= withdrawAmount;
+            updateScreen('Withdrawal Successful', `Withdrawn: $${withdrawAmount.toFixed(2)}<br>Remaining balance: $${currentBalance.toFixed(2)}`);
+            setTimeout(showMenu, 3000);
+        }
+
+        function processDeposit(amount) {
+            const depositAmount = parseFloat(amount);
+            if (isNaN(depositAmount) || depositAmount <= 0) {
+                updateScreen('Error', 'Invalid amount. Please try again.');
+                setTimeout(showDeposit, 2000);
+                return;
+            }
+            currentBalance += depositAmount;
+            updateScreen('Deposit Successful', `Deposited: $${depositAmount.toFixed(2)}<br>New balance: $${currentBalance.toFixed(2)}`);
+            setTimeout(showMenu, 3000);
+        }
+
+        function handleKeypadInput(value) {
+            if (currentMode === 'withdraw' || currentMode === 'deposit') {
+                currentInput += value;
+                document.getElementById('input-display').textContent = currentInput;
+            }
+        }
+
+        function handleClear() {
+            currentInput = '';
+            if (document.getElementById('input-display')) {
+                document.getElementById('input-display').textContent = '';
+            }
+        }
+
+        function handleEnter() {
+            if (currentMode === 'withdraw') {
+                processWithdraw(currentInput);
+            } else if (currentMode === 'deposit') {
+                processDeposit(currentInput);
+            }
+        }
+
+        // Event listeners
+        balanceBtn.addEventListener('click', showBalance);
+        withdrawBtn.addEventListener('click', showWithdraw);
+        depositBtn.addEventListener('click', showDeposit);
+
+        keypadBtns.forEach(btn => {
+            btn.addEventListener('click', () => handleKeypadInput(btn.dataset.value));
+        });
+
+        clearBtn.addEventListener('click', handleClear);
+        enterBtn.addEventListener('click', handleEnter);
+
+        // Initialize
+        showMenu();
+    </script>
+</body>
+</html>
